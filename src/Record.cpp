@@ -7,6 +7,7 @@
 #include "json.hpp"
 #include "artefact.h"
 #include "strand.h"
+#include <iomanip> // For formatting the output table
 
 /*
     initialises an empty record
@@ -72,4 +73,55 @@ Record::printFq()
     
     // then construct the formatted record
     return this->identifier + "\n" + this->sequence + "\n+\n" + this->quality + "\n";
+}
+
+/*
+    This method reports a breakdown of strand and artefact relationships in a matrix format.
+    It requires a collection of records to summarize their properties.
+*/
+void ReportMatrix(const std::vector<Record>& records) {
+    // Define strand and artefact categories
+    const std::vector<std::string> strands = {"+", "-", "?"};
+    const std::vector<std::string> artefacts = {"no artefact", "RTP-RTP", "TSO-TSO"};
+
+    // Matrix-like data structure to count occurrences
+    std::unordered_map<std::string, std::unordered_map<std::string, int>> matrix;
+
+    // Initialize matrix with zeros
+    for (const auto& strand : strands) {
+        for (const auto& artefact : artefacts) {
+            matrix[strand][artefact] = 0;
+        }
+    }
+
+    // Populate matrix with counts from records
+for (const auto& record : records) {
+        std::string strand(1, record.strand);
+        std::string artefact = artefact::getName(record.artefact);
+        matrix[strand][artefact]++;
+    }
+
+    // Print the matrix
+    std::cout << std::setw(12) << "Strand\\Artefact";
+    for (const auto& artefact : artefacts) {
+        std::cout << std::setw(12) << artefact;
+    }
+    std::cout << std::endl;
+
+    for (const auto& strand : strands) {
+        std::cout << std::setw(12) << strand;
+        for (const auto& artefact : artefacts) {
+            std::cout << std::setw(12) << matrix[strand][artefact];
+        }
+        std::cout << std::endl;
+    }
+
+    // Additional totals or relationships
+    int totalRecords = 0;
+    for (const auto& strandEntry : matrix) {
+        for (const auto& count : strandEntry.second) {
+            totalRecords += count.second;
+        }
+    }
+    std::cout << "Total Records: " << totalRecords << std::endl;
 }

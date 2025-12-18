@@ -40,5 +40,6 @@ class Record
         artefact;
 
 };
-
+// Function to report a matrix for multiple records
+void ReportMatrix(const std::vector<Record>& records);
 #endif

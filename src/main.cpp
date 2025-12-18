@@ -57,6 +57,9 @@ main(int argc, char ** argv)
     Record record = Record();
     int recordNum = 0;
 
+    // Collect all records into a vector for reporting
+    std::vector<Record> records; // New: Vector to store records
+
     while (true) {
         // try reading a record
         try {
@@ -82,12 +85,19 @@ main(int argc, char ** argv)
         stats.total++;
         stats.strand.stats[record.strand]++;
         stats.artefact.stats[record.artefact]++;
+
+        // Store the record in the collection for reporting
+        records.push_back(record); // New: Add the record to the vector
     }
 
     if (!config.silent) {
         program::good("Finished restranding!\n");
     }
 
+    // Generate and print out the matrix report
+    ReportMatrix(records); // New: Call ReportMatrix to analyze and print the summary
+
+    // Dump stats as JSON
     std::cout << toJson(stats, argv).dump(4) << "\n";
     // close the files
     reader.close();
